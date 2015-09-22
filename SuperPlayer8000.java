@@ -32,16 +32,12 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.*;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class SuperPlayer8000 extends JFrame implements Runnable
 {
@@ -54,8 +50,8 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 	}
 
     //Estrutura e informações basicas do programa
-        private  int w = 590;
-        private  int h  = 280;
+        private  int w = 690;
+        private  int h  = 480;
 
         ImageIcon icon      = null;
         //Isso veio do tocadorXis
@@ -106,6 +102,15 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         private Container painel                = getContentPane();
 
 
+        private DefaultTableModel model;
+        private DefaultTableModel modeltrilhas;
+        private JTable table;
+        private JTable tabletrilhas;
+
+        static final int FORMULA_DE_COMPASSO = 0x58;
+
+
+
 
     public SuperPlayer8000()
         {
@@ -114,7 +119,26 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             //Carrega o logo
             ImageIcon logo   = new javax.swing.ImageIcon(getClass().getResource("icon.png"));
+
             setIconImage(logo.getImage());
+            model = new DefaultTableModel();
+            modeltrilhas = new DefaultTableModel();
+
+
+
+            modeltrilhas.addColumn("0");//trilha 0... tem que ter pelo menos uma!
+
+
+            model.addColumn("Reso.");
+            model.addColumn("Dur (s)");
+            model.addColumn("N ticks");
+            model.addColumn("T ticks");
+            model.addColumn("T C.min");
+            model.addColumn("N C.min");
+            model.addColumn("BMP");
+            model.addColumn("Trilhas");
+
+
 
             //Estrutura da interface
             /*
@@ -141,6 +165,16 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             JPanel SecondRightPanel = new JPanel();
             JPanel Lines[] = {new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel()};
 
+            JPanel ExtraPanel = new JPanel();
+
+
+
+            JPanel TablePanel = new JPanel();
+
+            //Painel extra para informações midi:
+
+
+
 
 
             //painel.setLayout(new GridLayout(1,2)); //2 colunas
@@ -148,6 +182,9 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             Colunes[0].setLayout(new GridLayout(6,0));
             //Coluna do volume
             Colunes[1].setLayout(new GridLayout(1,0));
+
+            TablePanel.setLayout(new GridLayout(2,0));
+            painel.setLayout(new GridLayout(2,0));
 
 
             //Botões de menu devem ficar em cima
@@ -177,6 +214,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             Lines[2].add(InformationPanel);
             Lines[3].add(DurationLabel);
             Lines[4].add(Progresso);
+
 
 
 
@@ -251,10 +289,28 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             SecondRightPanel.setLayout(new BoxLayout(SecondRightPanel, BoxLayout.Y_AXIS));
             Colunes[1].add(SecondRightPanel);
 
-            painel.setLayout(new BoxLayout(painel, BoxLayout.X_AXIS));
+            ExtraPanel.setLayout(new BoxLayout(ExtraPanel, BoxLayout.X_AXIS));
 
-            painel.add(Colunes[0]);
-            painel.add(Colunes[1]);
+            ExtraPanel.add(Colunes[0]);
+            ExtraPanel.add(Colunes[1]);
+
+
+            painel.add(ExtraPanel);
+
+
+            table = new JTable(model);
+            tabletrilhas = new JTable(modeltrilhas);
+            JScrollPane scrollPane = new JScrollPane(table);
+            JScrollPane scrollPanetrilha = new JScrollPane(tabletrilhas);
+
+
+
+            TablePanel.add(scrollPane, BorderLayout.CENTER);
+            TablePanel.add(scrollPanetrilha, BorderLayout.CENTER);
+            painel.add(TablePanel);
+
+
+            //painel.add(new JButton("Isso nao faz nada"));
             //Faz a janela aparecer
             setSize(w, h);
             setResizable(false);
@@ -268,6 +324,114 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
     //Play
+    public void PrintData(){
+
+
+          long duracao     = SequencePlayer.getMicrosecondLength()/1000000;
+	      int  resolucao   = SequencePlayer.getResolution();
+	      long totaltiques = SequencePlayer.getTickLength();
+
+	      float durtique       = (float)duracao/totaltiques;
+	      float durseminima    = durtique*resolucao;
+	      float bpm            = 60/durseminima;
+	      int   totalseminimas = (int)(duracao/durseminima);
+        Track[] trilhas = SequencePlayer.getTracks();
+
+
+
+
+        String[] data = { "", "", "","", "", "","", "", "","", "", "","", "", "" };
+        data[0] = ""+ resolucao + "";
+        data[1] = ""+ duracao + "";
+        data[2] = ""+ totaltiques + "";
+        data[3] = ""+ durtique + "";
+        data[4] = ""+ durseminima + "";
+        data[5] = ""+ totalseminimas + "";
+        data[6] = ""+ Math.round(bpm) + "";
+        data[7] = ""+ trilhas.length+ "";
+
+        model.addRow(data);
+
+
+        for(int i=0; i<trilhas.length; i++){
+                if (i > 0){
+                    //Criar a coluna la na tabela... Afinal é...
+                    modeltrilhas.addColumn(""+i+"");
+                }
+                Track trilha =  trilhas[i];
+                Par    fc  =  null;
+                String st  = "--";
+                String stx = "--";
+                if(i==0) fc = getFormulaDeCompasso(trilha);
+                if(i==0)
+                try{ st =  getTonalidade(trilha);
+                   }
+                catch(Exception e){}
+
+                //---MetaMensagem de texto
+                try{ stx =  getTexto(trilha);
+                   }
+                catch(Exception e){}
+
+                //AKI QUE É A TRETA TEO!
+                /*
+                    Seguinte, pra exibit la na tela é só usar:
+                    modeltrilhas.addRow(data);
+
+                    Esse data é um vetor de string.
+
+                    O problema é que se tiver 10 colunas lá e vc passar um vetor com 5 elementos ele vai só crashar. Vc tem que passar os outros
+                    5 elementos com uma string vazia.
+
+                    O problema é que o arquivo .midi lê trilha por trilha, sendo uma trilha = coluna.
+                    La em cima em:
+                    modeltrilhas.addColumn(""+i+"");
+                    eu adcionei as colunas equivalente a quantidade de trilhas.
+                    A treta é, criar uma matriz pra conter todas as informações das trilhas e preencher todos os espaços vazios com string vazia
+                    para ela ficar quadrada certinha e n quebrar o programa! C:
+
+                    ps: ESSA parte de baixo é do tocadormidi.java
+                    eu pegei de la!
+                */
+
+                /*
+
+
+                if(fc!=null)
+	             System.out.println("Fórmula de Compasso: " + fc.getX() +":"+ (int)(Math.pow(2, fc.getY())) );
+
+                System.out.println("Tonalidade         : " + st);
+	             System.out.println("Texto              : " + stx);
+	             System.out.println("------------------------------------------");
+
+
+                for(int j=0; j<trilha.size(); j++)
+                {
+                  System.out.println("Trilha nº " + i );
+                  System.out.println("Evento nº " + j);
+                  MidiEvent   e          = trilha.get(j);
+                  MidiMessage mensagem   = e.getMessage();
+                  long        tique      = e.getTick();
+
+                  int n = mensagem.getStatus();
+
+                  String nomecomando = ""+n;
+
+                  switch(n)
+                  {
+                      case 128: nomecomando = "noteON"; break;
+                      case 144: nomecomando = "noteOFF"; break;
+                      case 255: nomecomando = "MetaMensagem  (a ser decodificada)"; break;
+                      //---(introduzir outros casos)
+                  }
+
+                  System.out.println("       Mensagem: " + nomecomando );
+                  System.out.println("       Instante: " + tique );
+	               System.out.println("------------------------------------------");
+                }*/
+              }
+
+    }
 	public void Play(long inicio){
 	    try{
 
@@ -291,7 +455,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 	 try {
             Thread.sleep(miliseg);
         }
-        atch(InterruptedException e) { }
+        catch(InterruptedException e) { }
     }
 
 
@@ -360,6 +524,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 SequencerVar.open();
                 SequencerVar.getTransmitter().setReceiver(receptor);
                 TDLabel.setText("Total:" + formataInstante(SequencerVar.getMicrosecondLength()/1000000));
+                PrintData();
                 retardo(100);
             }
             catch(InvalidMidiDataException e2) { System.out.println(e2+" : Erro nos dados midi."); }
@@ -407,7 +572,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
 	}
-
+//Sim eu pegei isso do TocadorXis
     public String formataInstante(double t1)
       {
         String inicio    = "";
@@ -442,12 +607,141 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         return inicio = "\n" + "   "+sh1+":"+       sm1+":"+    ss1+"";
       }
 
-            public String reformata(double x, int casas)
+    public String reformata(double x, int casas)
       { DecimalFormat df = new DecimalFormat() ;
         df.setGroupingUsed(false);
         df.setMaximumFractionDigits(casas);
         return df.format(x);
       }
+
+    static Par getFormulaDeCompasso(Track trilha)
+    {   int p=1;
+        int q=1;
+
+        for(int i=0; i<trilha.size(); i++)
+        {
+          MidiMessage m = trilha.get(i).getMessage();
+          if(m instanceof MetaMessage)
+          {
+            if(((MetaMessage)m).getType()==FORMULA_DE_COMPASSO)
+            {
+                MetaMessage mm = (MetaMessage)m;
+                byte[] data = mm.getData();
+                p = data[0];
+                q = data[1];
+                return new Par(p,q);
+            }
+          }
+        }
+        return new Par(p,q);
+    }
+
+
+
+    static private class Par
+    { int x, y;
+
+      Par (int x_, int y_)
+      { this.x = x_;
+        this.y = y_;
+      }
+
+      int getX()
+      { return x;
+      }
+
+      int getY()
+      { return y;
+      }
+
+    }
+    static final int MENSAGEM_TONALIDADE = 0x59;
+    static String getTonalidade(Track trilha) throws InvalidMidiDataException
+    {
+       String stonalidade = "";
+       for(int i=0; i<trilha.size(); i++)
+       { MidiMessage m = trilha.get(i).getMessage();
+
+
+       if(((MetaMessage)m).getType() == MENSAGEM_TONALIDADE)
+       {
+            MetaMessage mm        = (MetaMessage)m;
+            byte[]     data       = mm.getData();
+            byte       tonalidade = data[0];
+            byte       maior      = data[1];
+
+            String       smaior = "Maior";
+            if(maior==1) smaior = "Menor";
+
+            if(smaior.equalsIgnoreCase("Maior"))
+            {
+                switch (tonalidade)
+                {
+                    case -7: stonalidade = "Dób Maior"; break;
+                    case -6: stonalidade = "Solb Maior"; break;
+                    case -5: stonalidade = "Réb Maior"; break;
+                    case -4: stonalidade = "Láb Maior"; break;
+                    case -3: stonalidade = "Mib Maior"; break;
+                    case -2: stonalidade = "Sib Maior"; break;
+                    case -1: stonalidade = "Fá Maior"; break;
+                    case  0: stonalidade = "Dó Maior"; break;
+                    case  1: stonalidade = "Sol Maior"; break;
+                    case  2: stonalidade = "Ré Maior"; break;
+                    case  3: stonalidade = "Lá Maior"; break;
+                    case  4: stonalidade = "Mi Maior"; break;
+                    case  5: stonalidade = "Si Maior"; break;
+                    case  6: stonalidade = "Fá# Maior"; break;
+                    case  7: stonalidade = "Dó# Maior"; break;
+                }
+            }
+
+            else if(smaior.equalsIgnoreCase("Menor"))
+            {
+                switch (tonalidade)
+                {
+                    case -7: stonalidade = "Láb Menor"; break;
+                    case -6: stonalidade = "Mib Menor"; break;
+                    case -5: stonalidade = "Sib Menor"; break;
+                    case -4: stonalidade = "Fá Menor"; break;
+                    case -3: stonalidade = "Dó Menor"; break;
+                    case -2: stonalidade = "Sol Menor"; break;
+                    case -1: stonalidade = "Ré Menor"; break;
+                    case  0: stonalidade = "Lá Menor"; break;
+                    case  1: stonalidade = "Mi Menor"; break;
+                    case  2: stonalidade = "Si Menor"; break;
+                    case  3: stonalidade = "Fá# Menor"; break;
+                    case  4: stonalidade = "Dó# Menor"; break;
+                    case  5: stonalidade = "Sol# Menor"; break;
+                    case  6: stonalidade = "Ré# Menor"; break;
+                    case  7: stonalidade = "Lá# Menor"; break;
+                }
+            }
+         }
+      }
+      return stonalidade;
+    }
+
+    static final int MENSAGEM_TEXTO = 0x01;
+
+    static String getTexto(Track trilha) throws InvalidMidiDataException
+    {
+       String stexto = "";
+
+       for(int i=0; i<trilha.size(); i++)
+       { MidiMessage m = trilha.get(i).getMessage();
+
+         if(((MetaMessage)m).getType() == MENSAGEM_TEXTO)
+         {
+           MetaMessage mm  = (MetaMessage)m;
+           byte[]     data = mm.getData();
+
+           for(int j=0; j<data.length; j++)
+           { stexto += (char)data[j];
+           }
+        }
+     }
+     return stexto;
+    }
 
 
 }
