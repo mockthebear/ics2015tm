@@ -5,3 +5,12 @@ O trabalho consiste em 2 partes
 --Um modo de exibir na tela as propriedades do midi em tempo real
 ---Ter uma lista no qual exibe na tela os 10 ultimos valores
 ---Exibir o que a instrução faz e seus parametros.
+
+
+
+--Projeto compilado por linha de comando?
+
+
+javac Classe.java
+java Classe.class
+
