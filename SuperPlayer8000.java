@@ -48,6 +48,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
     //Main
     public static void main(String[] args)
     {
+          //Isso é para a função run. ela vai rodar paralelamente a função main
           Thread thread  = new Thread(new SuperPlayer8000());
           thread.start();
 	}
@@ -55,41 +56,36 @@ public class SuperPlayer8000 extends JFrame implements Runnable
     //Estrutura e informações basicas do programa
         private  int w = 590;
         private  int h  = 280;
+
         ImageIcon icon      = null;
-        //Isso veio do tocador Xis
-        private String diretorio        = System.getProperty("user.dir");
+        //Isso veio do tocadorXis
+        private String diretorio                = System.getProperty("user.dir");
 
 
 
-
-        final JButton PlayB             = new JButton("Play");
-        final JButton PauseB            = new JButton("Pause");
-        final JButton StopB             = new JButton("Stop");
-        final JButton OpenB             = new JButton("Open a file!!!!");
-
-        JLabel Cfile                    = new JLabel("Current file: ");
-        private String FileName         = "";
-        private File MidiFile           = null;
-
-        private Sequencer  SequencerVar = null;
+        //Botoes base
+        final JButton PlayB                     = new JButton("Play");
+        final JButton PauseB                    = new JButton("Pause");
+        final JButton StopB                     = new JButton("Stop");
+        final JButton OpenB                     = new JButton("Open a file!!!!");
+        //Label que vai conter o arquivo e algumas variaveis relacionadas a arquivo
+        JLabel Cfile                            = new JLabel("Current file: ");
+        private String FileName                 = "";
+        private File MidiFile                   = null;
+        //Estrutura do JavaSound
+        private Sequencer  SequencerVar         = null;
         private Sequence   SequencePlayer;
-        private Receiver   receptor     = null;
-
-
-        private JProgressBar Progress   = new JProgressBar();
-        private double Duration         = 0;
-        private long pausedDuration     = 0;
-        private long inicio             = 0;
-        private boolean Paused          = false;
-
-
-        private int          volume             = 89;
-        private JSlider      VolumeUi           = new JSlider(JSlider.VERTICAL,0, 127, volume);
-        JLabel VolumeLabel                      = new JLabel("Volume: " + 50 + "%");
-        JLabel DurationLabel                      = new JLabel("Duracao: 00:00:00");
-
-        private JProgressBar Progresso = new JProgressBar();
-
+        private Receiver   receptor             = null;
+        //Relacionado a duração play e pause
+        private JProgressBar Progress           = new JProgressBar();
+        private double Duration                 = 0;
+        private long pausedDuration             = 0;
+        private long inicio                     = 0;
+        private boolean Paused                  = false;
+        private JProgressBar Progresso          = new JProgressBar();
+        JLabel DurationLabel                    = new JLabel("Duracao: 00:00:00");
+        JLabel TDLabel                          = new JLabel("Total: 00:00:00");
+        //Relacionado a volume
         //Inicia-se com metade do volume
         /*
             Sabe-se que a escala de volume perceptivel é logaritimica
@@ -98,45 +94,49 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             A metade não é 75 nem 63, e sim 89 pois:
             sqrt((127*127)/2.0) = 89
 
+            edit: vi que no java eles ja consideram isso.
+            NEVERMIND!!!!
+
         */
+        private int          volume             = 50;
+        private JSlider      VolumeUi           = new JSlider(JSlider.VERTICAL,0, 127, volume);
+        JLabel VolumeLabel                      = new JLabel("Volume: " + 50 + "%");
 
-
-        //final JButton botaoMOSTRADORcaminho  = constroiBotao(" DIR: "+ diretorio, 9);
-        //final JButton botaoMOSTRADORarquivo  = constroiBotao(" Arquivo: ", 9);
-        //final JButton botaoMOSTRADORduracao  = constroiBotao(" Dura\u00e7\u00e3o: ", 9);
-        //final JButton botaoMOSTRADORinstante = constroiBotao(" ", 9);
-        //final JButton botaoMOSTRADORvalorvolume = constroiBotao(" ", 9);
-
-
+        //Painel principal
+        private Container painel                = getContentPane();
 
 
 
-
-
-
-
-
-
-	private Container painel = getContentPane();
-
-
-
-
-
-
-
-	public SuperPlayer8000()
+    public SuperPlayer8000()
         {
             super("SuperPlayer8000");
 
 
-
+            //Carrega o logo
             ImageIcon logo   = new javax.swing.ImageIcon(getClass().getResource("icon.png"));
             setIconImage(logo.getImage());
 
+            //Estrutura da interface
+            /*
+                Complicado...
+
+                Considere que um elemento Jpanel é uma lista que contem outros elementos
+                Existe formas de se exibir essa lista na tela.
+                Por exemplo. se eu colocar Jpanl com GridLayout(2,2) e adcionar 4 botões
+                Eles vão ser exibidos:
+                [b1][b2]
+                [b3][b4]
+                Acontece que dependendo de como vc tiver o tamanho da tela ele edita isso em tempo
+                de execução.
+                Outra coisa importante é que esse cunjunto de 4 botões pode ser um elemento só, pois
+                eles estão dentro o Jpanel.
+                Eu tentei ordenar a janela em um grande panel contendo 2 panels
+                o primeiro é onde fica o player, e o segundo é onde fica o volume.
+                o panel do player é apenas mais uma sequencia de paineis.
+                Ficou confuso logo a baixo :c
+
+            */
             int LINES_NUMBER = 5;
-
-
             JPanel Colunes[] = {new JPanel(),new JPanel()};
             JPanel SecondRightPanel = new JPanel();
             JPanel Lines[] = {new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel()};
@@ -146,22 +146,35 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             //painel.setLayout(new GridLayout(1,2)); //2 colunas
             //A primeira coluna vai conter tudo
             Colunes[0].setLayout(new GridLayout(6,0));
+            //Coluna do volume
             Colunes[1].setLayout(new GridLayout(1,0));
 
 
             //Botões de menu devem ficar em cima
+            //Botão de open
             OpenB.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
                     OpenFile();
                 }
             });
             OpenB.setEnabled(true);
+            //Ele vai ficar na primeira linha da primeira coluna
             Lines[0].add(OpenB);
 
-            UpdateFile("");
-            Lines[1].add(Cfile);
-            Lines[2].add(new JLabel("2"));
 
+            //File name
+            UpdateFile("");
+            //Ele vai ficar na primeira linha da primeira coluna
+            Lines[1].add(Cfile);
+
+
+            /*
+                Informações:
+            */
+            JPanel InformationPanel = new JPanel();
+            InformationPanel.setLayout(new GridLayout(2,0));
+            InformationPanel.add(TDLabel);
+            Lines[2].add(InformationPanel);
             Lines[3].add(DurationLabel);
             Lines[4].add(Progresso);
 
@@ -192,11 +205,11 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             StopB.setEnabled(false);
             Lines[LINES_NUMBER].add(StopB);
 
-
+            //Seta o volume
             VolumeUi.addChangeListener(new ChangeListener(){
                 public void stateChanged(ChangeEvent e) {
                     JSlider source = (JSlider)e.getSource();
-
+                        if (receptor != null){
                             int valor = (int)source.getValue();
                             ShortMessage mensagemDeVolume = new ShortMessage();
                             for(int i=0; i<16; i++)
@@ -208,7 +221,9 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                             }
                             volume = valor;
                             VolumeLabel.setText("Volume: " + reformata((volume*100)/127, 3) + "%");
-
+                        }else{
+                            VolumeUi.setValue(89);
+                        }
                     }
 
                 });
@@ -240,7 +255,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             painel.add(Colunes[0]);
             painel.add(Colunes[1]);
-
+            //Faz a janela aparecer
             setSize(w, h);
             setResizable(false);
             setLocation(640,480);
@@ -252,7 +267,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 	}
 
 
-
+    //Play
 	public void Play(long inicio){
 	    try{
 
@@ -262,25 +277,21 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 receptor = SequencerVar.getTransmitters().iterator().next().getReceiver();
                 SequencerVar.getTransmitter().setReceiver(receptor);
                 long duracao  = SequencerVar.getMicrosecondLength()/1000000;
-                //botaoMOSTRADORduracao.setText("\nDura\u00e7\u00e3o:"+ formataInstante(duracao));
-                //botaoMOSTRADORinstante.setText(formataInstante(0));
-
+                TDLabel.setText("Total:" + formataInstante(duracao));
                 SequencerVar.setMicrosecondPosition(inicio);
                 PauseB.setEnabled(true);
                 PlayB.setEnabled(true);
                 StopB.setEnabled(true);
             }
-
-
-
             catch(Exception e){  System.out.println(e.toString());  }
 
 	}
 
 	void retardo(int miliseg){
-	 try { Thread.sleep(miliseg);
-                }
-            catch(InterruptedException e) { }
+	 try {
+            Thread.sleep(miliseg);
+        }
+        atch(InterruptedException e) { }
     }
 
 
@@ -347,6 +358,8 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 StopB.setEnabled(false);
                 SequencerVar.setSequence(SequencePlayer);
                 SequencerVar.open();
+                SequencerVar.getTransmitter().setReceiver(receptor);
+                TDLabel.setText("Total:" + formataInstante(SequencerVar.getMicrosecondLength()/1000000));
                 retardo(100);
             }
             catch(InvalidMidiDataException e2) { System.out.println(e2+" : Erro nos dados midi."); }
@@ -376,16 +389,15 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                     }else{
                         Progresso.setValue(pos);
                     }
-                    retardo(100);
+
                 }
                 catch(Exception e) {
                     System.out.println(e.getMessage());
                 }
-                System.out.println("Running\n");
                 retardo(100);
             }else{
                 try{
-                    retardo(1000);
+                    retardo(500);
                 }
                 catch(Exception e) {
                     System.out.println(e.getMessage());
