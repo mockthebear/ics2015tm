@@ -1,0 +1,2 @@
+javac SuperPlayer8000.java
+java SuperPlayer8000
