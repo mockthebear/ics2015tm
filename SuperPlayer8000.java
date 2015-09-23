@@ -73,13 +73,11 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         private Sequence   SequencePlayer;
         private Receiver   receptor             = null;
         //Relacionado a duraao play e pause
-        private JProgressBar Progress           = new JProgressBar();
         private double Duration                 = 0;
         private long pausedDuration             = 0;
         private long inicio                     = 0;
         private boolean Paused                  = false;
         private JProgressBar Progresso          = new JProgressBar();
-        JLabel DurationLabel                    = new JLabel("Duracao: 00:00:00");
         JLabel TDLabel                          = new JLabel("Total: 00:00:00");
         //Relacionado a volume
         //Inicia-se com metade do volume
@@ -119,11 +117,22 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             //Carrega o logo
             ImageIcon logo   = new javax.swing.ImageIcon(getClass().getResource("assets/icon.png"));
+            Progresso.setStringPainted(true);
+            Progresso.setString(formataInstante(0));
 
+
+            Dimension prefSize = Progresso.getPreferredSize();
+            prefSize.width = 296;
+            Progresso.setPreferredSize(prefSize);
             setIconImage(logo.getImage());
             model = new DefaultTableModel();
             modeltrilhas = new DefaultTableModel();
             modeltrilhas.addColumn("Instante");//trilha 0... tem que ter pelo menos uma!
+
+             Progresso.setForeground(Color.orange);
+            Progresso.setBackground(Color.white);
+
+
             model.addColumn("Reso.");
             model.addColumn("Dur (s)");
             model.addColumn("N ticks");
@@ -209,7 +218,6 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             InformationPanel.setLayout(new GridLayout(2,0));
             InformationPanel.add(TDLabel);
             Lines[2].add(InformationPanel);
-            Lines[3].add(DurationLabel);
             Lines[4].add(Progresso);
 
 
@@ -305,8 +313,8 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
 
-            TablePanel.add(scrollPane, BorderLayout.CENTER);
-            TablePanel.add(scrollPanetrilha, BorderLayout.CENTER);
+            TablePanel.add(scrollPane);
+            TablePanel.add(scrollPanetrilha);
             painel.add(TablePanel);
 
 
@@ -586,11 +594,11 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 pos   = (int) ((t*100)/dur);
                 try {
 
-                    DurationLabel.setText(formataInstante(t));
+                    Progresso.setString(formataInstante(t));
 
                     if(t>=dur){
                         Progresso.setValue(0);
-                        DurationLabel.setText("Duracao:" + formataInstante(0));
+                        Progresso.setString(formataInstante(0));
                         PlayB.setEnabled(true);
                         PauseB.setEnabled(false);
                         StopB.setEnabled(false);
