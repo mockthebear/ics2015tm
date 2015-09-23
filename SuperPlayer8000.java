@@ -48,20 +48,16 @@ public class SuperPlayer8000 extends JFrame implements Runnable
     //Main
     public static void main(String[] args)
     {
-          //Isso é para a função run. ela vai rodar paralelamente a função main
+          //Isso e para a funao run. ela vai rodar paralelamente a funcao main
           Thread thread  = new Thread(new SuperPlayer8000());
           thread.start();
 	}
 
-    //Estrutura e informações basicas do programa
+    //Estrutura e informaoes basicas do programa
         private  int w = 690;
         private  int h  = 480;
 
         ImageIcon icon      = null;
-        //Isso veio do tocadorXis
-        private String diretorio                = System.getProperty("user.dir");
-
-
 
         //Botoes base
         final JButton PlayB                     = new JButton("Tocar");
@@ -76,7 +72,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         private Sequencer  SequencerVar         = null;
         private Sequence   SequencePlayer;
         private Receiver   receptor             = null;
-        //Relacionado a duração play e pause
+        //Relacionado a duraao play e pause
         private JProgressBar Progress           = new JProgressBar();
         private double Duration                 = 0;
         private long pausedDuration             = 0;
@@ -88,10 +84,10 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         //Relacionado a volume
         //Inicia-se com metade do volume
         /*
-            Sabe-se que a escala de volume perceptivel é logaritimica
+            Sabe-se que a escala de volume perceptivel e logaritimica
             Dado que o computador armazena a escala de 0 a 1, sendo 0% e 100%
             0-127 corresponde respectivamente a escala de volume.
-            A metade não é 75 nem 63, e sim 89 pois:
+            A metade nao e 75 nem 63, e sim 89 pois:
             sqrt((127*127)/2.0) = 89
 
             edit: vi que no java eles ja consideram isso.
@@ -122,7 +118,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
             //Carrega o logo
-            ImageIcon logo   = new javax.swing.ImageIcon(getClass().getResource("icon.png"));
+            ImageIcon logo   = new javax.swing.ImageIcon(getClass().getResource("assets/icon.png"));
 
             setIconImage(logo.getImage());
             model = new DefaultTableModel();
@@ -141,27 +137,26 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             /*
                 Complicado...
 
-                Considere que um elemento Jpanel é uma lista que contem outros elementos
+                Considere que um elemento Jpanel e uma lista que contem outros elementos
                 Existe formas de se exibir essa lista na tela.
-                Por exemplo. se eu colocar Jpanl com GridLayout(2,2) e adcionar 4 botões
-                Eles vão ser exibidos:
+                Por exemplo. se eu colocar Jpanl com GridLayout(2,2) e adcionar 4 botoes
+                Eles vao ser exibidos:
                 [b1][b2]
                 [b3][b4]
                 Acontece que dependendo de como vc tiver o tamanho da tela ele edita isso em tempo
-                de execução.
-                Outra coisa importante é que esse cunjunto de 4 botões pode ser um elemento só, pois
-                eles estão dentro o Jpanel.
+                de execuao.
+                Outra coisa importante e que esse cunjunto de 4 botoes pode ser um elemento so, pois
+                eles estao dentro o Jpanel.
                 Eu tentei ordenar a janela em um grande panel contendo 2 panels
-                o primeiro é onde fica o player, e o segundo é onde fica o volume.
-                o panel do player é apenas mais uma sequencia de paineis.
+                o primeiro  onde fica o player, e o segundo  onde fica o volume.
+                o panel do player  apenas mais uma sequencia de paineis.
                 Ficou confuso logo a baixo :c
 
             */
             int LINES_NUMBER = 5;
-            ImagePanel panele = new ImagePanel(new ImageIcon("bher.png").getImage());
 
             JPanel Colunes[] = {new JPanel(),new JPanel()};
-            JPanel SecondRightPanel = new ImagePanel(new ImageIcon("volume.png").getImage());
+            JPanel SecondRightPanel = new ImagePanel(new ImageIcon("assets/volume.png").getImage());
             JPanel Lines[] = {new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel()};
 
             JPanel ExtraPanel = new JPanel();
@@ -170,7 +165,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             JPanel TablePanel = new JPanel();
 
-            //Painel extra para informações midi:
+            //Painel extra para informaoes midi:
 
 
 
@@ -189,8 +184,8 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
 
-            //Botões de menu devem ficar em cima
-            //Botão de open
+            //Botoes de menu devem ficar em cima
+            //Botao de open
             OpenB.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
                     OpenFile();
@@ -208,7 +203,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
             /*
-                Informações:
+                Informaoes:
             */
             JPanel InformationPanel = new JPanel();
             InformationPanel.setLayout(new GridLayout(2,0));
@@ -220,13 +215,14 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
 
-            //Botões devem ficar na utima linha
+            //Botoes devem ficar na utima linha
             PlayB.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
                     Play(0);
                 }
             });
             PlayB.setEnabled(false);
+            PlayB.setIcon(new javax.swing.ImageIcon(getClass().getResource("assets/play.png")));
             Lines[LINES_NUMBER].add(PlayB);
 
             PauseB.addActionListener(new ActionListener(){
@@ -235,6 +231,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 }
             });
             PauseB.setEnabled(false);
+            PauseB.setIcon(new javax.swing.ImageIcon(getClass().getResource("assets/pause.png")));
             Lines[LINES_NUMBER].add(PauseB);
 
             StopB.addActionListener(new ActionListener(){
@@ -243,6 +240,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                 }
             });
             StopB.setEnabled(false);
+            StopB.setIcon(new javax.swing.ImageIcon(getClass().getResource("assets/stop.png")));
             Lines[LINES_NUMBER].add(StopB);
 
             //Seta o volume
@@ -397,24 +395,16 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
                 for(int j=0; j<trilha.size(); j++)
                 {
-                  MidiEvent   e          = trilha.get(j);
-                  MidiMessage mensagem   = e.getMessage();
-                  long        tick      = e.getTick();
+                    MidiEvent   e          = trilha.get(j);
+                    MidiMessage mensagem   = e.getMessage();
+                    long        tick      = e.getTick();
+                    int statusNmbr = mensagem.getStatus();
+                    int actualTrack = statusNmbr & 0b00001111;
+                    statusNmbr = statusNmbr & 0b11110000;
+                    byte msgNmbr[] = mensagem.getMessage();
+                    String nomecomando = "";
 
-
-
-
-                  int statusNmbr = mensagem.getStatus();
-
-                  int actualTrack = statusNmbr & 0b00001111;
-                  statusNmbr = statusNmbr & 0b11110000;
-                  byte msgNmbr[] = mensagem.getMessage();
-                  int NM = 3;
-
-                  String nomecomando = "";
-
-                  switch(statusNmbr)
-                  {
+                    switch(statusNmbr){
 
                       case 128: {nomecomando = "noteON {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+","+(msgNmbr[2]&0b01111111)+"}"; break;}
                       case 144: {nomecomando = "noteOFF {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
@@ -425,8 +415,8 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                       case 224: {nomecomando = "Pitch Bend {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
                       case 240: {nomecomando = "System {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
                       //---(introduzir outros casos)
-                  }
-                  nomecomando = "["+statusNmbr+"]"+nomecomando;
+                    }
+                    nomecomando = "["+statusNmbr+"]"+nomecomando;
                     boolean found = false;
                     int position = 0;
                     for (int aux=0;aux<maxLoaded_all;aux++){
@@ -477,12 +467,12 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
                 }
-              }
-              modeltrilhas.addRow(F_Line);
-              for (int i=0;i<maxLoaded_all;i++){
-
-                    modeltrilhas.addRow(Loaded[i]);
-              }
+            }
+            //Linhas
+            modeltrilhas.addRow(F_Line);
+            for (int i=0;i<maxLoaded_all;i++){
+                modeltrilhas.addRow(Loaded[i]);
+            }
 
     }
 	public void Play(long inicio){
@@ -600,7 +590,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
                     if(t>=dur){
                         Progresso.setValue(0);
-                        DurationLabel.setText("Duração:" + formataInstante(0));
+                        DurationLabel.setText("Duracao:" + formataInstante(0));
                         PlayB.setEnabled(true);
                         PauseB.setEnabled(false);
                         StopB.setEnabled(false);
@@ -625,7 +615,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
 	}
-//Sim eu pegei isso do TocadorXis
+//Daqui para baixo eu re usei as funcoes que foram dadas durante a aula e em exemplos
     public String formataInstante(double t1)
       {
         String inicio    = "";
@@ -730,21 +720,21 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             {
                 switch (tonalidade)
                 {
-                    case -7: stonalidade = "Dób Maior"; break;
+                    case -7: stonalidade = "Dob Maior"; break;
                     case -6: stonalidade = "Solb Maior"; break;
-                    case -5: stonalidade = "Réb Maior"; break;
-                    case -4: stonalidade = "Láb Maior"; break;
+                    case -5: stonalidade = "Reb Maior"; break;
+                    case -4: stonalidade = "L1b Maior"; break;
                     case -3: stonalidade = "Mib Maior"; break;
                     case -2: stonalidade = "Sib Maior"; break;
-                    case -1: stonalidade = "Fá Maior"; break;
+                    case -1: stonalidade = "Fa Maior"; break;
                     case  0: stonalidade = "Dó Maior"; break;
                     case  1: stonalidade = "Sol Maior"; break;
-                    case  2: stonalidade = "Ré Maior"; break;
-                    case  3: stonalidade = "Lá Maior"; break;
+                    case  2: stonalidade = "Re Maior"; break;
+                    case  3: stonalidade = "La Maior"; break;
                     case  4: stonalidade = "Mi Maior"; break;
                     case  5: stonalidade = "Si Maior"; break;
-                    case  6: stonalidade = "Fá# Maior"; break;
-                    case  7: stonalidade = "Dó# Maior"; break;
+                    case  6: stonalidade = "Fa# Maior"; break;
+                    case  7: stonalidade = "Do# Maior"; break;
                 }
             }
 
@@ -752,21 +742,21 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             {
                 switch (tonalidade)
                 {
-                    case -7: stonalidade = "Láb Menor"; break;
+                    case -7: stonalidade = "Lab Menor"; break;
                     case -6: stonalidade = "Mib Menor"; break;
                     case -5: stonalidade = "Sib Menor"; break;
-                    case -4: stonalidade = "Fá Menor"; break;
-                    case -3: stonalidade = "Dó Menor"; break;
+                    case -4: stonalidade = "Fa Menor"; break;
+                    case -3: stonalidade = "Do Menor"; break;
                     case -2: stonalidade = "Sol Menor"; break;
-                    case -1: stonalidade = "Ré Menor"; break;
-                    case  0: stonalidade = "Lá Menor"; break;
+                    case -1: stonalidade = "Re Menor"; break;
+                    case  0: stonalidade = "La Menor"; break;
                     case  1: stonalidade = "Mi Menor"; break;
                     case  2: stonalidade = "Si Menor"; break;
-                    case  3: stonalidade = "Fá# Menor"; break;
-                    case  4: stonalidade = "Dó# Menor"; break;
+                    case  3: stonalidade = "Fa# Menor"; break;
+                    case  4: stonalidade = "Do# Menor"; break;
                     case  5: stonalidade = "Sol# Menor"; break;
-                    case  6: stonalidade = "Ré# Menor"; break;
-                    case  7: stonalidade = "Lá# Menor"; break;
+                    case  6: stonalidade = "Re# Menor"; break;
+                    case  7: stonalidade = "La# Menor"; break;
                 }
             }
          }
@@ -810,11 +800,7 @@ class ImagePanel extends JPanel {
   public ImagePanel(Image img) {
     this.img = img;
     Dimension size = new Dimension(img.getWidth(null), img.getHeight(null));
-    //setPreferredSize(size);
-    //setMinimumSize(size);
-    //setMaximumSize(size);
-    //setSize(size);
-    //setLayout(null);
+    setMaximumSize(size);
   }
 
   public void paintComponent(Graphics g) {
