@@ -64,12 +64,12 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
         //Botoes base
-        final JButton PlayB                     = new JButton("Play");
-        final JButton PauseB                    = new JButton("Pause");
-        final JButton StopB                     = new JButton("Stop");
-        final JButton OpenB                     = new JButton("Open a file!!!!");
+        final JButton PlayB                     = new JButton("Tocar");
+        final JButton PauseB                    = new JButton("Pausa");
+        final JButton StopB                     = new JButton("Para");
+        final JButton OpenB                     = new JButton("Abrir arquivo!!!!");
         //Label que vai conter o arquivo e algumas variaveis relacionadas a arquivo
-        JLabel Cfile                            = new JLabel("Current file: ");
+        JLabel Cfile                            = new JLabel("Arquivo: ");
         private String FileName                 = "";
         private File MidiFile                   = null;
         //Estrutura do JavaSound
@@ -315,7 +315,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             //painel.add(new JButton("Isso nao faz nada"));
             //Faz a janela aparecer
             setSize(w, h);
-            setResizable(false);
+            //setResizable(false);
             setLocation(640,480);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setVisible(true);
@@ -405,26 +405,33 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
 
                   int statusNmbr = mensagem.getStatus();
+
+                  int actualTrack = statusNmbr & 0b00001111;
+                  statusNmbr = statusNmbr & 0b11110000;
                   byte msgNmbr[] = mensagem.getMessage();
                   int NM = 3;
 
-                  String nomecomando = "Uncoded";
+                  String nomecomando = "";
 
                   switch(statusNmbr)
                   {
-                      case 128: nomecomando = "noteON"; break;
-                      case 144: nomecomando = "noteOFF"; break;
-                      case 176: nomecomando = "Control Change"; break;
-                      case 255: nomecomando = "System"; break;
+
+                      case 128: {nomecomando = "noteON {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+","+(msgNmbr[2]&0b01111111)+"}"; break;}
+                      case 144: {nomecomando = "noteOFF {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
+                      case 160: {nomecomando = "Polyphonic Key {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
+                      case 176: {nomecomando = "Control Change on {"+actualTrack+"}"; break;}
+                      case 192: {nomecomando = "Program Change to {"+(msgNmbr[0]&0b01111111)+"}"; break;}
+                      case 208: {nomecomando = "Channel Pressure {"+(msgNmbr[0]&0b01111111)+"}"; break;}
+                      case 224: {nomecomando = "Pitch Bend {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
+                      case 240: {nomecomando = "System {"+(msgNmbr[0]&0b01111111)+","+(msgNmbr[1]&0b01111111)+"}"; break;}
                       //---(introduzir outros casos)
                   }
-                  nomecomando = nomecomando+"["+statusNmbr+"]<"+msgNmbr[0]+">";
+                  nomecomando = "["+statusNmbr+"]"+nomecomando;
                     boolean found = false;
                     int position = 0;
                     for (int aux=0;aux<maxLoaded_all;aux++){
                         if (check[aux][0] == tick){
                             if (check[aux][i+1] == -1){
-                                check[aux][i+1] = 1;
                                 position = aux;
                                 System.out.println("found at pos "+aux);
                                 found = true;
@@ -457,21 +464,16 @@ public class SuperPlayer8000 extends JFrame implements Runnable
                             check = check_aux;
                             Loaded = Loaded_aux;
                             maxLoaded += 100;
-
                         }
-
-
-
-
-
-
                     }
-
-                  //Realloc
-
-
-
-                  Loaded[position][i+1] = nomecomando;
+                    if (check[position][i+1] == 1){
+                        System.out.println("ERROR.................");
+                        System.out.println("["+position+"]["+(i+1)+"]");
+                        break;
+                    }
+                    Loaded[position][i+1] = nomecomando;
+                    check[position][i+1] = 1;
+                    System.out.println("["+position+"]["+(i+1)+"]"+nomecomando);
 
 
                 }
