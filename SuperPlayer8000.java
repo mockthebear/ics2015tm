@@ -38,7 +38,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
 
+import javax.swing.ImageIcon;
 public class SuperPlayer8000 extends JFrame implements Runnable
 {
     //Main
@@ -123,12 +127,7 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             setIconImage(logo.getImage());
             model = new DefaultTableModel();
             modeltrilhas = new DefaultTableModel();
-
-
-
-            modeltrilhas.addColumn("0");//trilha 0... tem que ter pelo menos uma!
-
-
+            modeltrilhas.addColumn("Instante");//trilha 0... tem que ter pelo menos uma!
             model.addColumn("Reso.");
             model.addColumn("Dur (s)");
             model.addColumn("N ticks");
@@ -137,8 +136,6 @@ public class SuperPlayer8000 extends JFrame implements Runnable
             model.addColumn("N C.min");
             model.addColumn("BMP");
             model.addColumn("Trilhas");
-
-
 
             //Estrutura da interface
             /*
@@ -161,8 +158,10 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             */
             int LINES_NUMBER = 5;
+            ImagePanel panele = new ImagePanel(new ImageIcon("bher.png").getImage());
+
             JPanel Colunes[] = {new JPanel(),new JPanel()};
-            JPanel SecondRightPanel = new JPanel();
+            JPanel SecondRightPanel = new ImagePanel(new ImageIcon("volume.png").getImage());
             JPanel Lines[] = {new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel(),new JPanel()};
 
             JPanel ExtraPanel = new JPanel();
@@ -185,6 +184,9 @@ public class SuperPlayer8000 extends JFrame implements Runnable
 
             TablePanel.setLayout(new GridLayout(2,0));
             painel.setLayout(new GridLayout(2,0));
+
+
+
 
 
             //Botões de menu devem ficar em cima
@@ -327,18 +329,15 @@ public class SuperPlayer8000 extends JFrame implements Runnable
     public void PrintData(){
 
 
-          long duracao     = SequencePlayer.getMicrosecondLength()/1000000;
-	      int  resolucao   = SequencePlayer.getResolution();
-	      long totaltiques = SequencePlayer.getTickLength();
+        long duracao     = SequencePlayer.getMicrosecondLength()/1000000;
+        int  resolucao   = SequencePlayer.getResolution();
+        long totaltiques = SequencePlayer.getTickLength();
 
-	      float durtique       = (float)duracao/totaltiques;
-	      float durseminima    = durtique*resolucao;
-	      float bpm            = 60/durseminima;
-	      int   totalseminimas = (int)(duracao/durseminima);
+        float durtique       = (float)duracao/totaltiques;
+        float durseminima    = durtique*resolucao;
+        float bpm            = 60/durseminima;
+        int   totalseminimas = (int)(duracao/durseminima);
         Track[] trilhas = SequencePlayer.getTracks();
-
-
-
 
         String[] data = { "", "", "","", "", "","", "", "","", "", "","", "", "" };
         data[0] = ""+ resolucao + "";
@@ -351,84 +350,136 @@ public class SuperPlayer8000 extends JFrame implements Runnable
         data[7] = ""+ trilhas.length+ "";
 
         model.addRow(data);
-
-
+        //Data to load and show stuff
+        int maxLoaded = 10;
+        int maxLoaded_all = 0;
+        String[][] Loaded   = new String[maxLoaded][trilhas.length+1];
+        String[] F_Line = new String[trilhas.length+1];
+        long[][] check       = new long[maxLoaded][trilhas.length+1];
         for(int i=0; i<trilhas.length; i++){
-                if (i > 0){
-                    //Criar a coluna la na tabela... Afinal é...
-                    modeltrilhas.addColumn(""+i+"");
-                }
+            for(int e=0; e<maxLoaded; e++){
+               check[e][i+1] = -1;
+            }
+        }
+        F_Line[0] = "-";
+        //Itarator on trilhas
+        for(int i=0; i<trilhas.length; i++){
+
                 Track trilha =  trilhas[i];
+
                 Par    fc  =  null;
                 String st  = "--";
                 String stx = "--";
-                if(i==0) fc = getFormulaDeCompasso(trilha);
-                if(i==0)
-                try{ st =  getTonalidade(trilha);
-                   }
-                catch(Exception e){}
+                if(i==0){
+                    fc = getFormulaDeCompasso(trilha);
+                }
+                if(i==0){
+                    try{
+                        st =  getTonalidade(trilha);
+                    }
+                    catch(Exception e){}
+                }
+
 
                 //---MetaMensagem de texto
-                try{ stx =  getTexto(trilha);
-                   }
+                try{
+                    stx =  getTexto(trilha);
+                }
                 catch(Exception e){}
 
-                //AKI QUE É A TRETA TEO!
-                /*
-                    Seguinte, pra exibit la na tela é só usar:
-                    modeltrilhas.addRow(data);
 
-                    Esse data é um vetor de string.
+	             modeltrilhas.addColumn(""+i+":"+st);
 
-                    O problema é que se tiver 10 colunas lá e vc passar um vetor com 5 elementos ele vai só crashar. Vc tem que passar os outros
-                    5 elementos com uma string vazia.
-
-                    O problema é que o arquivo .midi lê trilha por trilha, sendo uma trilha = coluna.
-                    La em cima em:
-                    modeltrilhas.addColumn(""+i+"");
-                    eu adcionei as colunas equivalente a quantidade de trilhas.
-                    A treta é, criar uma matriz pra conter todas as informações das trilhas e preencher todos os espaços vazios com string vazia
-                    para ela ficar quadrada certinha e n quebrar o programa! C:
-
-                    ps: ESSA parte de baixo é do tocadormidi.java
-                    eu pegei de la!
-                */
-
-                /*
-
-
-                if(fc!=null)
-	             System.out.println("Fórmula de Compasso: " + fc.getX() +":"+ (int)(Math.pow(2, fc.getY())) );
-
-                System.out.println("Tonalidade         : " + st);
-	             System.out.println("Texto              : " + stx);
-	             System.out.println("------------------------------------------");
+	             F_Line[i+1] = stx;
+	             if(fc!=null)
+                    F_Line[i+1] = F_Line[i+1]+""+fc.getX() +":"+ (int)(Math.pow(2, fc.getY()))+"";
 
 
                 for(int j=0; j<trilha.size(); j++)
                 {
-                  System.out.println("Trilha nº " + i );
-                  System.out.println("Evento nº " + j);
                   MidiEvent   e          = trilha.get(j);
                   MidiMessage mensagem   = e.getMessage();
-                  long        tique      = e.getTick();
+                  long        tick      = e.getTick();
 
-                  int n = mensagem.getStatus();
 
-                  String nomecomando = ""+n;
 
-                  switch(n)
+
+                  int statusNmbr = mensagem.getStatus();
+                  byte msgNmbr[] = mensagem.getMessage();
+                  int NM = 3;
+
+                  String nomecomando = "Uncoded";
+
+                  switch(statusNmbr)
                   {
                       case 128: nomecomando = "noteON"; break;
                       case 144: nomecomando = "noteOFF"; break;
-                      case 255: nomecomando = "MetaMensagem  (a ser decodificada)"; break;
+                      case 176: nomecomando = "Control Change"; break;
+                      case 255: nomecomando = "System"; break;
                       //---(introduzir outros casos)
                   }
+                  nomecomando = nomecomando+"["+statusNmbr+"]<"+msgNmbr[0]+">";
+                    boolean found = false;
+                    int position = 0;
+                    for (int aux=0;aux<maxLoaded_all;aux++){
+                        if (check[aux][0] == tick){
+                            if (check[aux][i+1] == -1){
+                                check[aux][i+1] = 1;
+                                position = aux;
+                                System.out.println("found at pos "+aux);
+                                found = true;
+                                break;
+                            }else{
+                                System.out.println("found at pos "+aux+" but "+(i+1)+" is "+check[aux][i+1]);
+                            }
 
-                  System.out.println("       Mensagem: " + nomecomando );
-                  System.out.println("       Instante: " + tique );
-	               System.out.println("------------------------------------------");
-                }*/
+                        }
+                    }
+                    if (found == false){
+                        Loaded[maxLoaded_all][0] = ""+tick+"";
+                        check[maxLoaded_all][0] = tick;
+                        position = maxLoaded_all;
+                        maxLoaded_all++;
+                        if (maxLoaded_all >= maxLoaded){
+                            String[][] Loaded_aux = new String[maxLoaded+100][trilhas.length+1];
+                            long[][] check_aux       = new long[maxLoaded+100][trilhas.length+1];
+                            for(int k=0; k<trilhas.length; k++){
+                                for(int m=0; m<maxLoaded+100; m++){
+                                   check_aux[m][k+1] = -1;
+                                }
+                            }
+                            for (int k=0;k<maxLoaded;k++){
+                                for (int m=0;m<trilhas.length+1;m++){
+                                    Loaded_aux[k][m] = Loaded[k][m];
+                                    check_aux[k][m] = check[k][m];
+                                }
+                            }
+                            check = check_aux;
+                            Loaded = Loaded_aux;
+                            maxLoaded += 100;
+
+                        }
+
+
+
+
+
+
+                    }
+
+                  //Realloc
+
+
+
+                  Loaded[position][i+1] = nomecomando;
+
+
+                }
+              }
+              modeltrilhas.addRow(F_Line);
+              for (int i=0;i<maxLoaded_all;i++){
+
+                    modeltrilhas.addRow(Loaded[i]);
               }
 
     }
@@ -743,6 +794,30 @@ public class SuperPlayer8000 extends JFrame implements Runnable
      return stexto;
     }
 
+
+}
+
+class ImagePanel extends JPanel {
+
+  private Image img;
+
+  public ImagePanel(String img) {
+    this(new ImageIcon(img).getImage());
+  }
+
+  public ImagePanel(Image img) {
+    this.img = img;
+    Dimension size = new Dimension(img.getWidth(null), img.getHeight(null));
+    //setPreferredSize(size);
+    //setMinimumSize(size);
+    //setMaximumSize(size);
+    //setSize(size);
+    //setLayout(null);
+  }
+
+  public void paintComponent(Graphics g) {
+    g.drawImage(img, 0, 0, null);
+  }
 
 }
 
