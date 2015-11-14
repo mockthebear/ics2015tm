@@ -1,5 +1,6 @@
-javac -cp sintese.jar D20.java
+javac -cp sintese.jar T2.java
 @echo "fim da compilacao, aperte enter para rodar"
 pause
-java -cp .;sintese.jar D20
+java -cp .;sintese.jar T2
 @echo "rodou"
+pause
