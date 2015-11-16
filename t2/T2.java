@@ -45,6 +45,11 @@ public class T2 extends JFrame implements Runnable
     final JButton Button1                     = new JButton("instrumento A");
     final JButton Button2                     = new JButton("instrumento B");
     final JButton Button3                     = new JButton("instrumento C");
+
+    final JButton bm1                     = new JButton("Fuga 1");
+    final JButton bm2                     = new JButton("tema_aa_drawing_quintet_flauta");
+    final JButton bm3                     = new JButton("tema_bwv775_invencao4_direita");
+    final JButton bm4                     = new JButton("melodiasexta1");
     private Container painel                = getContentPane();
     JLabel frequenciaLab        = new JLabel("Frequencia:");
     JTextField frequenciaGet    = new JTextField("0.2");
@@ -56,6 +61,22 @@ public class T2 extends JFrame implements Runnable
     JTextField ganhoGet         = new JTextField("103.0f");
     JLabel andamentoLab         = new JLabel("Andamento:");
     JTextField andamentoGet     = new JTextField("0.95");
+
+    JLabel pontoslabel             = new JLabel("Pontos:");
+
+    JTextField curvaPontos[]    = {
+        new JTextField("0"),new JTextField("0"),
+        new JTextField("30"),new JTextField("400"),
+        new JTextField("240"),new JTextField("300"),
+        new JTextField("720"),new JTextField("0"),
+        new JTextField("-1"),new JTextField("-1"),
+        new JTextField("-1"),new JTextField("-1"),
+        new JTextField("-1"),new JTextField("-1"),
+    };
+
+
+
+    Melodia m2                  = Tema.tema_aa_fuga1();
     InstrumentoT2A instrumentoA                     = new InstrumentoT2A(0.2f);
     InstrumentoT2B instrumentoB                     = new InstrumentoT2B(0.2f);
     InstrumentoT2C instrumentoC                     = new InstrumentoT2C(0.2f);
@@ -85,7 +106,15 @@ public class T2 extends JFrame implements Runnable
         JPanel ExtraPanel = new JPanel();
         JPanel SettingsPanel = new JPanel();
         SettingsPanel.setBorder(BorderFactory.createEtchedBorder());
-        SettingsPanel.setLayout(new GridLayout(1,4));
+        SettingsPanel.setLayout(new GridLayout(0,4));
+
+
+        JPanel CurvaPanel = new JPanel();
+        JPanel TemaPanel = new JPanel();
+        JPanel CurvaPanel_big = new JPanel();
+        CurvaPanel.setLayout(new GridLayout(8,2));
+        CurvaPanel_big.setLayout(new GridLayout(0,1));
+        TemaPanel.setLayout(new GridLayout(2,2));
 
         SettingsPanel.add(frequenciaLab);
         SettingsPanel.add(frequenciaGet);
@@ -99,18 +128,63 @@ public class T2 extends JFrame implements Runnable
         SettingsPanel.add(andamentoGet);
 
 
-        ExtraPanel.setLayout(new BoxLayout(ExtraPanel, BoxLayout.X_AXIS));
+        //ExtraPanel.setLayout(new BoxLayout(ExtraPanel, BoxLayout.X_AXIS));
 
 
         ExtraPanel.add(Colunes[0]);
         ExtraPanel.add(Colunes[1]);
         ExtraPanel.add(Colunes[2]);
 
-        painel.setLayout(new GridLayout(2,0));
+
+        CurvaPanel_big.add(pontoslabel);
+        CurvaPanel_big.add(CurvaPanel);
+
+        CurvaPanel.add(curvaPontos[0]);
+        CurvaPanel.add(curvaPontos[1]);
+        CurvaPanel.add(curvaPontos[2]);
+        CurvaPanel.add(curvaPontos[3]);
+        CurvaPanel.add(curvaPontos[4]);
+        CurvaPanel.add(curvaPontos[5]);
+        CurvaPanel.add(curvaPontos[6]);
+        CurvaPanel.add(curvaPontos[7]);
+        CurvaPanel.add(curvaPontos[8]);
+        CurvaPanel.add(curvaPontos[9]);
+        CurvaPanel.add(curvaPontos[10]);
+        CurvaPanel.add(curvaPontos[11]);
+        CurvaPanel.add(curvaPontos[12]);
+        CurvaPanel.add(curvaPontos[13]);
+
+        TemaPanel.add(bm1);
+        TemaPanel.add(bm2);
+        TemaPanel.add(bm3);
+        TemaPanel.add(bm4);
+
+        painel.setLayout(new GridLayout(2,2));
         painel.add(ExtraPanel);
         painel.add(SettingsPanel);
+        painel.add(CurvaPanel_big);
+        painel.add(TemaPanel);
 
-
+        bm1.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                m2 = Tema.tema_aa_fuga1();
+            }
+        });
+        bm2.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                m2 = Tema.tema_aa_drawing_quintet_flauta();
+            }
+        });
+        bm3.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                m2 = Tema.tema_bwv775_invencao4_direita();
+            }
+        });
+        bm4.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                m2 = Tema. 	melodiasexta1();
+            }
+        });
 
         Button1.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -120,10 +194,27 @@ public class T2 extends JFrame implements Runnable
                 Curva        curva  = new Curva(720);
                 UnidadeH		UH1 =   new UnidadeH();
                 UnidadeH		UH2 =   new UnidadeH();
-                curva.addPonto(  0f,   0f);
-                curva.addPonto( 30f, 400f);
+
+                for (int i=0;i<14;i += 2){
+
+                    String str1 = curvaPontos[i].getText();
+                    String str2 = curvaPontos[i+1].getText();
+                    if (!str1.equals("") && !str2.equals("")) {
+                        double f1 = Double.parseDouble(str1);
+                        double f2 = Double.parseDouble(str2);
+                        if (f1 >= 0 && f2 >= 0){
+                                System.out.print("Ponto: ");
+                            System.out.print(f1);
+                            System.out.print(" - ");
+                            System.out.println(f2);
+                            curva.addPonto(  (float)f1,  (float)f2);
+                        }
+                    }
+                }
+
+                /*curva.addPonto( 30f, 400f);
                 curva.addPonto(240f, 300f);
-                curva.addPonto(720f,   0f);
+                curva.addPonto(720f,   0f);*/
                 env.setCURVA(curva);
 
                 instrumentoA.setEnvoltoria(env);
@@ -133,9 +224,8 @@ public class T2 extends JFrame implements Runnable
                 instrumentoA.setGanho(ganho);
 
                 instrumentoA.reset();
-
-                Melodia m2 = Tema.tema_aa_fuga1();
                 m2.setAndamento(andamento);
+
                 Som som = m2.getSom(instrumentoA);
                 som.setNome("teste2A");
                 som.visualiza();
@@ -151,11 +241,22 @@ public class T2 extends JFrame implements Runnable
                 UnidadeH		UH1 =   new UnidadeH();
                 UnidadeH		UH2 =   new UnidadeH();
 
-                curva.addPonto(  0f,   0f);
-                curva.addPonto( 30f, 400f);
-                curva.addPonto(240f, 300f);
-                curva.addPonto(720f,   0f);
+                for (int i=0;i<14;i += 2){
 
+                    String str1 = curvaPontos[i].getText();
+                    String str2 = curvaPontos[i+1].getText();
+                    if (!str1.equals("") && !str2.equals("")) {
+                        double f1 = Double.parseDouble(str1);
+                        double f2 = Double.parseDouble(str2);
+                        if (f1 > 0 && f2 > 0){
+                                System.out.print("Ponto: ");
+                            System.out.print(f1);
+                            System.out.print(" - ");
+                            System.out.println(f2);
+                            curva.addPonto(  (float)f1,  (float)f2);
+                        }
+                    }
+                }
                 env.setCURVA(curva);
                 instrumentoB.setEnvoltoria(env);
                 instrumentoB.setFrequencia(frequencia);
@@ -165,7 +266,6 @@ public class T2 extends JFrame implements Runnable
 
                 instrumentoB.reset();
 
-                Melodia m2 = Tema.tema_aa_fuga1();
                 m2.setAndamento(andamento);
                 Som som = m2.getSom(instrumentoB);
                 som.setNome("teste2B");
@@ -182,10 +282,22 @@ public class T2 extends JFrame implements Runnable
                 UnidadeH		UH1 =   new UnidadeH();
                 UnidadeH		UH2 =   new UnidadeH();
 
-                curva.addPonto(  0f,   0f);
-                curva.addPonto( 30f, 400f);
-                curva.addPonto(240f, 300f);
-                curva.addPonto(720f,   0f);
+                for (int i=0;i<14;i += 2){
+
+                    String str1 = curvaPontos[i].getText();
+                    String str2 = curvaPontos[i+1].getText();
+                    if (!str1.equals("") && !str2.equals("")) {
+                        double f1 = Double.parseDouble(str1);
+                        double f2 = Double.parseDouble(str2);
+                        if (f1 > 0 && f2 > 0){
+                            System.out.print("Ponto: ");
+                            System.out.print(f1);
+                            System.out.print(" - ");
+                            System.out.println(f2);
+                            curva.addPonto(  (float)f1,  (float)f2);
+                        }
+                    }
+                }
 
                 env.setCURVA(curva);
                 instrumentoC.setEnvoltoria(env);
@@ -196,10 +308,9 @@ public class T2 extends JFrame implements Runnable
 
                 instrumentoC.reset();
 
-                Melodia m2 = Tema.tema_aa_fuga1();
                 m2.setAndamento(andamento);
                 Som som = m2.getSom(instrumentoC);
-                som.setNome("teste2B");
+                som.setNome("teste2C");
                 som.visualiza();
 
             }
