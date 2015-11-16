@@ -77,9 +77,9 @@ public class T2 extends JFrame implements Runnable
 
 
     Melodia m2                  = Tema.tema_aa_fuga1();
-    InstrumentoT2A instrumentoA                     = new InstrumentoT2A(0.2f);
-    InstrumentoT2B instrumentoB                     = new InstrumentoT2B(0.2f);
-    InstrumentoT2C instrumentoC                     = new InstrumentoT2C(0.2f);
+    InstrumentoT2A instrumentoA;
+    InstrumentoT2B instrumentoB;
+    InstrumentoT2C instrumentoC;
 
     float frequencia    =   0.2f;
     float lambda        =   0.5f;
@@ -216,7 +216,7 @@ public class T2 extends JFrame implements Runnable
                 curva.addPonto(240f, 300f);
                 curva.addPonto(720f,   0f);*/
                 env.setCURVA(curva);
-
+                instrumentoA = new InstrumentoT2A(frequencia);
                 instrumentoA.setEnvoltoria(env);
                 instrumentoA.setFrequencia(frequencia);
                 instrumentoA.setLambda(lambda);
@@ -258,6 +258,7 @@ public class T2 extends JFrame implements Runnable
                     }
                 }
                 env.setCURVA(curva);
+                instrumentoB = new InstrumentoT2B(frequencia);
                 instrumentoB.setEnvoltoria(env);
                 instrumentoB.setFrequencia(frequencia);
                 instrumentoB.setLambda(lambda);
@@ -300,6 +301,7 @@ public class T2 extends JFrame implements Runnable
                 }
 
                 env.setCURVA(curva);
+                instrumentoC = new InstrumentoT2C(frequencia);
                 instrumentoC.setEnvoltoria(env);
                 instrumentoC.setFrequencia(frequencia);
                 instrumentoC.setLambda(lambda);
