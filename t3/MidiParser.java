@@ -103,6 +103,7 @@ public class MidiParser
                     F_Line[i+1] = F_Line[i+1]+""+fc.getX() +":"+ (int)(Math.pow(2, fc.getY()))+"";
 
                 int sizee = 0;
+                long lastTick = -1;
                 for(int j=0; j<trilha.size(); j++)
                 {
                     MidiEvent   e          = trilha.get(j);
@@ -112,19 +113,23 @@ public class MidiParser
                     int actualTrack = statusNmbr & 0b00001111;
                     statusNmbr = statusNmbr & 0b11110000;
                     MidiMessage message = e.getMessage();
-                    if (message instanceof ShortMessage) {
-                        ShortMessage sm = (ShortMessage) message;
-                        //byte msgNmbr[] = mensagem.getMessage();
+                    if (tick != lastTick){ //Isso é cheat.
+                         lastTick = tick;
+                        if (message instanceof ShortMessage) {
+                            ShortMessage sm = (ShortMessage) message;
+                            //byte msgNmbr[] = mensagem.getMessage();
 
-                        if (sm.getCommand() == 0x90){ //Note on
-                            int key = sm.getData1();
-                            int velocity = sm.getData2();
-                            int kk = 0;
-                            if (sm.getCommand() == 0x90)
-                                kk = 1;
-                            String nomecomando = "  {"+i+","+kk+","+tick+","+velocity+","+key+"},";
-                            System.out.println(nomecomando);
-                            sizee++;
+                            if (sm.getCommand() == 0x90){ //Note on
+
+                                int key = sm.getData1();
+                                int velocity = sm.getData2();
+                                int kk = 0;
+                                if (sm.getCommand() == 0x90)
+                                    kk = 1;
+                                String nomecomando = "  {"+i+","+kk+","+tick+","+velocity+","+key+"},";
+                                System.out.println(nomecomando);
+                                sizee++;
+                            }
                         }
                     }
 
@@ -141,7 +146,7 @@ public class MidiParser
 
 	public void OpenFile(){
             try {
-                SequencePlayer = MidiSystem.getSequence(new File("mvioloncelo1.mid"));
+                SequencePlayer = MidiSystem.getSequence(new File("beethoven_ode_to_joy.mid"));
                 SequencerVar = MidiSystem.getSequencer();
                 SequencerVar.setSequence(SequencePlayer);
                 SequencerVar.open();
