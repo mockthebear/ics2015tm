@@ -15,10 +15,11 @@ public class LeTocador
     int Notes[][] = {
 
   {1,1,254,0,60},
-  {2,1,256,76,64},
+  {1,1,256,76,64},
   {1,1,510,0,64},
   {1,1,512,79,65},
   {1,1,766,0,65},
+  {2,1,766,0,65},
   {1,1,768,82,67},
   {1,1,974,0,48},
   {1,1,1022,0,67},
@@ -29,11 +30,13 @@ public class LeTocador
   {1,1,1534,0,65},
   {1,1,1536,69,64},
   {1,1,1790,0,64},
+  {2,1,1790,0,64},
   {1,1,1792,69,62},
   {1,1,1998,0,55},
   {1,1,2046,0,62},
   {1,1,2048,73,60},
   {1,1,2302,0,60},
+  {2,1,2302,0,60},
   {1,1,2304,74,60},
   {1,1,2558,0,60},
   {1,1,2560,78,62},
@@ -51,6 +54,7 @@ public class LeTocador
   {1,1,4091,0,59},
   {1,1,4096,85,60},
   {1,1,4350,0,60},
+  {2,1,4352,76,64},
   {1,1,4352,76,64},
   {1,1,4606,0,64},
   {1,1,4608,80,65},
@@ -169,7 +173,7 @@ public class LeTocador
   {1,1,16379,0,60},
 
 };
-    int totalSize = 153;
+    int totalSize = 157;
 
     private class Data_Som
     {
@@ -188,10 +192,9 @@ public class LeTocador
     Dispositivo disp[] = {
 
         BancoDeInstrumentos.marimba_i51(1f),
+        BancoDeInstrumentos.flauta_nao_harmonica_tonal(0.9f),
+        BancoDeInstrumentos.marimba_i51(0.9f),
 
-        BancoDeInstrumentos.marimba_i51(0.4f),
-        BancoDeInstrumentos.marimba_i51(1f),
-        BancoDeInstrumentos.marimba_i51(1f),
 
 
 
